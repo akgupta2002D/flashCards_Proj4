@@ -1,6 +1,11 @@
 # Project Overview
 Flashcard SaaS is a web application designed to help students and professionals efficiently create, manage, and study flashcards. Built using Next.js, React, Firebase, and Stripe, this project integrates OpenAI for AI-powered flashcard generation and provides a seamless subscription experience via Stripe.
 
+# Routes
+We plan on having 2 routes as of now (subject to change in the future):
+1. /sign-up : Clerk sign-up and login page
+2. /generate: Main page for generating flashcards.
+
 ## Features
 1. Flashcard Generation: Users can generate flashcards from text input using OpenAI's API, creating a set of 10 flashcards with concise front and back content.
 2. User Authentication: Secure user authentication and account management powered by Clerk.
