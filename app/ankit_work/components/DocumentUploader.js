@@ -36,7 +36,7 @@ function DocumentUploader () {
         <Typography
           variant='h5'
           gutterBottom
-          color='primary'
+          color='#003893'
           textAlign={'center'}
           fontWeight={'600'}
         >
@@ -48,8 +48,8 @@ function DocumentUploader () {
         >
           {/* Text Input Section */}
           <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <Typography variant='h6' color='#CC0000'>
-              Enter Your Notes/Text
+            <Typography fontSize={'18px'} color='#003893'>
+              Enter Text
             </Typography>
             <TextField
               label='Type something...'
@@ -65,6 +65,7 @@ function DocumentUploader () {
               variant='contained'
               endIcon={<SendIcon />}
               color='primary'
+              sx={{ backgroundColor: '#003893' }}
               onClick={handleTextSubmit}
             >
               Submit Text
@@ -74,8 +75,8 @@ function DocumentUploader () {
           <Divider sx={{ my: 2 }} />
 
           {/* File Upload Section */}
-          <Typography variant='h6' color='#CC0000'>
-            Upload Files Instead
+          <Typography fontSize={'18px'} color='#CC0000'>
+            Upload Files
           </Typography>
           <Box
             sx={{
@@ -112,6 +113,7 @@ function DocumentUploader () {
               color='primary'
               onClick={handleFileSubmit}
               fullWidth
+              sx={{ backgroundColor: '#003893' }}
             >
               Submit File
             </Button>
