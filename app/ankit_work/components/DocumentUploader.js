@@ -9,16 +9,52 @@ import {
   Input,
   CssBaseline,
   Container,
-  Divider
+  Divider,
+  IconButton
 } from '@mui/material'
 import UploadFileIcon from '@mui/icons-material/UploadFile'
 import SendIcon from '@mui/icons-material/Send'
+import VisibilityIcon from '@mui/icons-material/Visibility'
+import { useRouter } from 'next/navigation'
+
+import { db } from '../utils/firebase'
+import { collection, doc, setDoc } from 'firebase/firestore'
 
 export default function DocumentUploader () {
   const [text, setText] = useState('')
   const [file, setFile] = useState(null)
   const [flashcards, setFlashcards] = useState([]) // State to hold flashcards
   const [title, setTitle] = useState('')
+
+  const router = useRouter()
+
+  const saveFlashcardsToFirebase = async (title, flashcards) => {
+    try {
+      console.log('Saving flashcards:', { title, flashcards })
+
+      // Step 1: Get or create the FlashCardsContainer
+      const containerRef = doc(db, 'FlashCardsContainer', title)
+
+      // Step 2: Add flashcards directly under the title
+      for (const flashcard of flashcards) {
+        const flashcardRef = doc(collection(containerRef, 'flashcards'))
+        console.log('Saving flashcard:', flashcard)
+
+        await setDoc(flashcardRef, {
+          front: flashcard.front,
+          back: flashcard.back,
+          createdAt: new Date()
+        })
+
+        console.log('Flashcard saved:', flashcard)
+      }
+
+      console.log('Flashcards saved successfully!')
+    } catch (error) {
+      console.error('Error saving flashcards:', error)
+      throw error
+    }
+  }
 
   const handleTextSubmit = async () => {
     console.log('Generate Flashcards button clicked!')
@@ -46,26 +82,63 @@ export default function DocumentUploader () {
     }
   }
 
-  const handleFileSubmit = () => {
-    if (file) {
-      console.log('File name:', file.name)
-      // Additional logic for file processing can be added here
-    }
+  const [error, setError] = useState('')
+
+  const handleFileChange = event => {
+    setFile(event.target.files[0])
+    setError('') // Clear any previous errors
   }
 
-  const handleSave = () => {
-    console.log('Save the cards button clicked!')
-    // Logic to save the flashcards
+  const handleFileSubmit = async () => {}
+
+  const handleSave = async () => {
+    if (!title || flashcards.length === 0) {
+      console.log('Title and flashcards are required.')
+      return
+    }
+
+    try {
+      await saveFlashcardsToFirebase(title, flashcards)
+    } catch (error) {
+      console.error('Error during saving:', error)
+    }
   }
 
   const handleRegenerate = () => {
     console.log('Regenerate button clicked!')
-    handleTextSubmit() // Regenerate the flashcards using the current text input
+    setText('') // Clear the text input
+    setFlashcards([]) // Clear the flashcards
+    setTitle('') // Clear the title
   }
 
-  const handleEnhance = () => {
+  const handleEnhance = async () => {
     console.log('Enhance button clicked!')
-    // Logic to enhance the flashcards, could involve modifying the current flashcards
+
+    try {
+      const enhancedText = `Enhance it. ${text}`
+      const response = await fetch('/ankit_work/generate_flashcards', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ userText: enhancedText })
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        console.log('Enhanced Flashcards:', data.flashcards)
+        setFlashcards(data.flashcards) // Update state with the enhanced flashcards
+        setTitle(data.title) // Update state with the enhanced title
+      } else {
+        console.error('Error enhancing flashcards:', response.statusText)
+      }
+    } catch (error) {
+      console.error('Error enhancing flashcards:', error)
+    }
+  }
+
+  const handleViewFlashcards = () => {
+    router.push('/ankit_work/view_flashcards')
   }
 
   return (
@@ -130,10 +203,10 @@ export default function DocumentUploader () {
               }}
             >
               <Input
-                accept='*/*'
+                accept='application/pdf,image/*'
                 id='contained-button-file'
                 type='file'
-                onChange={e => setFile(e.target.files[0])}
+                onChange={handleFileChange}
                 sx={{ display: 'none' }}
               />
               <label htmlFor='contained-button-file'>
@@ -165,15 +238,29 @@ export default function DocumentUploader () {
 
         {/* Flashcards Output Section */}
         <Box flex={1}>
-          <Typography
-            variant='h5'
-            gutterBottom
-            color='#003893'
-            textAlign='center'
-            fontWeight='600'
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between'
+            }}
           >
-            YOUR OUTPUT
-          </Typography>
+            <Typography
+              variant='h5'
+              gutterBottom
+              color='#003893'
+              fontWeight='600'
+            >
+              YOUR OUTPUT
+            </Typography>
+            <IconButton
+              color='primary'
+              aria-label='view flashcards'
+              onClick={handleViewFlashcards}
+            >
+              <VisibilityIcon />
+            </IconButton>
+          </Box>
           <Paper
             elevation={3}
             sx={{ p: 4, gap: 2, display: 'flex', flexDirection: 'column' }}

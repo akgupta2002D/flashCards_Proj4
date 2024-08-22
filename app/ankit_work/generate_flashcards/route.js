@@ -1,4 +1,4 @@
-import { createLlamaChatCompletion } from '../../utils/LlamaRouter'
+import { createLlamaChatCompletion } from '../utils/LlamaRouter'
 
 export async function POST (req) {
   try {
