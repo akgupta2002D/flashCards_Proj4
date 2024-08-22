@@ -20,14 +20,39 @@ import { useRouter } from 'next/navigation'
 import { db } from '../utils/firebase'
 import { collection, doc, setDoc } from 'firebase/firestore'
 
+/*
+===========================================================
+                      DOCUMENT UPLOADER COMPONENT
+===========================================================
+*/
+
 export default function DocumentUploader () {
+  // State to hold user input text
   const [text, setText] = useState('')
+  // State to hold uploaded file
   const [file, setFile] = useState(null)
-  const [flashcards, setFlashcards] = useState([]) // State to hold flashcards
+  // State to hold generated flashcards
+  const [flashcards, setFlashcards] = useState([])
+  // State to hold the title of the flashcards
   const [title, setTitle] = useState('')
 
+  // State to manage error messages
+  const [error, setError] = useState('')
+
+  // Router for navigation
   const router = useRouter()
 
+  /*
+===========================================================
+                      FIREBASE FUNCTIONS
+===========================================================
+*/
+
+  /**
+   * Save flashcards to Firebase under a specific title.
+   * @param {string} title - The title of the flashcards container.
+   * @param {Array} flashcards - The flashcards to be saved.
+   */
   const saveFlashcardsToFirebase = async (title, flashcards) => {
     try {
       console.log('Saving flashcards:', { title, flashcards })
@@ -56,6 +81,15 @@ export default function DocumentUploader () {
     }
   }
 
+  /*
+===========================================================
+                    TEXT HANDLING FUNCTIONS
+===========================================================
+*/
+
+  /**
+   * Handle submission of the text to generate flashcards.
+   */
   const handleTextSubmit = async () => {
     console.log('Generate Flashcards button clicked!')
     console.log('Text:', text)
@@ -73,7 +107,7 @@ export default function DocumentUploader () {
         const data = await response.json()
         console.log('Generated Flashcards:', data.flashcards)
         setFlashcards(data.flashcards) // Update state with the generated flashcards
-        setTitle(data.title) // Update state with the generated flashcards
+        setTitle(data.title) // Update state with the generated title
       } else {
         console.error('Error generating flashcards:', response.statusText)
       }
@@ -82,35 +116,9 @@ export default function DocumentUploader () {
     }
   }
 
-  const [error, setError] = useState('')
-
-  const handleFileChange = event => {
-    setFile(event.target.files[0])
-    setError('') // Clear any previous errors
-  }
-
-  const handleFileSubmit = async () => {}
-
-  const handleSave = async () => {
-    if (!title || flashcards.length === 0) {
-      console.log('Title and flashcards are required.')
-      return
-    }
-
-    try {
-      await saveFlashcardsToFirebase(title, flashcards)
-    } catch (error) {
-      console.error('Error during saving:', error)
-    }
-  }
-
-  const handleRegenerate = () => {
-    console.log('Regenerate button clicked!')
-    setText('') // Clear the text input
-    setFlashcards([]) // Clear the flashcards
-    setTitle('') // Clear the title
-  }
-
+  /**
+   * Handle enhancement of the text and regenerate flashcards.
+   */
   const handleEnhance = async () => {
     console.log('Enhance button clicked!')
 
@@ -137,9 +145,72 @@ export default function DocumentUploader () {
     }
   }
 
+  /**
+   * Handle the clearing and resetting of text and flashcards.
+   */
+  const handleRegenerate = () => {
+    console.log('Regenerate button clicked!')
+    setText('') // Clear the text input
+    setFlashcards([]) // Clear the flashcards
+    setTitle('') // Clear the title
+  }
+
+  /*
+===========================================================
+                    FILE HANDLING FUNCTIONS
+===========================================================
+*/
+
+  /**
+   * Handle the change of file input.
+   * @param {Event} event - The file change event.
+   */
+  const handleFileChange = event => {
+    setFile(event.target.files[0])
+    setError('') // Clear any previous errors
+  }
+
+  /**
+   * Placeholder for file submission logic.
+   */
+  const handleFileSubmit = async () => {
+    // Logic to handle file submission will go here
+  }
+
+  /*
+===========================================================
+                 SAVE AND VIEW FUNCTIONS
+===========================================================
+*/
+
+  /**
+   * Handle saving of the flashcards to Firebase.
+   */
+  const handleSave = async () => {
+    if (!title || flashcards.length === 0) {
+      console.log('Title and flashcards are required.')
+      return
+    }
+
+    try {
+      await saveFlashcardsToFirebase(title, flashcards)
+    } catch (error) {
+      console.error('Error during saving:', error)
+    }
+  }
+
+  /**
+   * Navigate to the flashcards viewing page.
+   */
   const handleViewFlashcards = () => {
     router.push('/ankit_work/view_flashcards')
   }
+
+  /*
+===========================================================
+                       RENDERING UI
+===========================================================
+*/
 
   return (
     <>
@@ -281,7 +352,7 @@ export default function DocumentUploader () {
               <Typography>No flashcards generated yet.</Typography>
             )}
 
-            {/* New Buttons */}
+            {/* Action Buttons */}
             <Box
               sx={{ display: 'flex', justifyContent: 'space-between', mt: 4 }}
             >
